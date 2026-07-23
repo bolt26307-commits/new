@@ -12,6 +12,7 @@ import {
   conversations,
   doctorNotes,
   notifications,
+  doctor,
   weeklyAppointmentTrend,
   monthlyConsultationTrend,
   departmentDistribution,
@@ -19,9 +20,6 @@ import {
   doctorPerformance,
   satisfactionTrend,
 } from './data';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth } from '@/firebase/auth';
-import { db } from '@/firebase/firestore';
 import type {
   Patient,
   Appointment,
@@ -39,29 +37,8 @@ const delay = (ms = 300) => new Promise((r) => setTimeout(r, ms));
 export const dataService = {
   // --- Doctor ---
   async getDoctorProfile(): Promise<DoctorProfile> {
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('Not authenticated');
-    }
-
-    const snap = await getDoc(doc(db, 'users', currentUser.uid));
-    if (!snap.exists()) {
-      throw new Error('User profile not found');
-    }
-
-    const data = snap.data();
-    return {
-      id: currentUser.uid,
-      name: data.name ?? 'Unknown',
-      title: data.title ?? '',
-      specialty: data.specialty ?? 'General Medicine',
-      avatarUrl: data.avatarUrl,
-      email: data.email ?? currentUser.email ?? '',
-      phone: data.phone ?? '',
-      license: data.license ?? '',
-      hospital: data.hospital ?? '',
-      yearsExperience: data.yearsExperience ?? 0,
-    };
+    await delay();
+    return doctor;
   },
 
   // --- Patients ---
