@@ -22,7 +22,9 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ThemeToggle } from '@/components/dashboard/theme-toggle';
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { auth } from "@/firebase/auth";
+import { db } from "@/firebase/firestore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,9 +47,24 @@ const handleSubmit = async (e: React.FormEvent) => {
     console.log("auth =", auth);
     console.log("auth type =", typeof auth);
 
-    await signInWithEmailAndPassword(auth, email, password);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
 
-    router.push("/overview");
+    try {
+      const snap = await getDoc(doc(db, "users", cred.user.uid));
+      const role = snap.exists() ? (snap.data().role as string) : null;
+
+      if (role === "admin") {
+        router.push("/admin");
+      } else if (role === "doctor") {
+        router.push("/overview");
+      } else {
+        // Unknown role — keep user on login page
+        console.error("Unknown role:", role);
+        await auth.signOut();
+      }
+    } catch (err) {
+      console.error("Failed to read user profile:", err);
+    }
   } catch (error) {
     console.error("FULL ERROR:", error);
   } finally {

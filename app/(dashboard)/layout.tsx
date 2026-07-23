@@ -13,7 +13,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['doctor']}>
     <div className="min-h-screen bg-background">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="lg:pl-64">

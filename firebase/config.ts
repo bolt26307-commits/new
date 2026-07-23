@@ -1,9 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-
-console.log({
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-});
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,9 +9,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-console.log("Firebase Config:", firebaseConfig);
+let _app: FirebaseApp | null = null;
 
-export const app =
-  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+export function getFirebaseApp(): FirebaseApp {
+  if (_app) return _app;
+  _app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  return _app;
+}
 
-console.log("Initialized App:", app);
+export const app = new Proxy({} as FirebaseApp, {
+  get(_target, prop) {
+    return Reflect.get(getFirebaseApp() as unknown as Record<string | symbol, unknown>, prop);
+  },
+});
